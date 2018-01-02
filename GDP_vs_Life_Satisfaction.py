@@ -4,11 +4,17 @@ import numpy as np
 import pandas as pd
 import sklearn
 
-# Uses pandas to import GDP/Life satisfaction data from 2 CSVs
-oecd_bli = pd.read_csv('oecd_bli_2015.csv', thousands=',')
-gdp_per_capita = pd.read_csv('gdp_per_capita.csv', thousands=',', delimeter='\t', encoding='latin1', na_values='n/a')
+def prepare_country_stats(oecd_bli, gdp_per_capita):
+    oecd_bli = oecd_bli[oecd_bli['INEQUALITY'] == 'TOT'] # Constrain to where column INEQUALITY == TOT
+    oecd_bli = oecd_bli.pivot(index='country', columns='Indicator', values='Values')
+    oecd_bli.head(2)
+    return oecd_bli
 
-#
+# Uses pandas to import GDP/Life satisfaction data from 2 CSVs
+oecd_bli = pd.read_csv('oecd_bli_2017.csv', thousands=',')
+gdp_per_capita = pd.read_csv('gdp_per_capita.csv', thousands=',', delimiter='\t', encoding='latin1', na_values='n/a')
+
+# Reorders data and sets specific columns to variables x and y
 country_stats = prepare_country_stats(oecd_bli, gdp_per_capita)
 x = np.c_[country_stats['GDP Per Capita']]
 y = np.c_[country_stats['Life Satisfaction']]
@@ -26,4 +32,4 @@ model.fit(x, y)
 
 # Predicts life satisfaction of Cyprus based on their GDP
 X_new = [[22587]]
-print(model.predict(X-new))
+print(model.predict(X_new))
